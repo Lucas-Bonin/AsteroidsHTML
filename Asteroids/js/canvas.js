@@ -29,10 +29,13 @@ var Canvas = Class.extend({
 
 				for(var i=2,len=p.length; i<len; i+=2){
 					this.lineTo(p[i] + x, p[i+1] + y);
-					console.log("nada"+p[i]);
 				}
 				this.stroke(); //desenha tudo
 			};
+
+			ctx.clearAll = function(){ //limpa tudo que tem no canvas
+				this.clearRect(0, 0, this.width, this.height);
+			}
 
 			return ctx;
 
