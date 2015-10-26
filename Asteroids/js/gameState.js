@@ -13,16 +13,36 @@ var GameState = State.extend({
 	init: function(game){
 		this._super(game); //chama construtor da classe pai
 
+		this.asteroids = []; //asteroides no jogo
+
 		//teste para verificar desenho no canvas
-		var n = Math.round(Math.random() * Points.ASTEROIDS.length-1);
-		this.astr = new Asteroid(Points.ASTEROIDS[n],10,100,100);
+
+		for(var i=0; i<10; i++){
+
+			var n = Math.round(Math.random() * (Points.ASTEROIDS.length-1));
+			var astr = new Asteroid(Points.ASTEROIDS[n],10,100,100);
+			//parametros para asteroide saber o tamanho maximo do canvas
+			astr.maxX = game.canvas.ctx.width;
+			astr.maxY = game.canvas.ctx.height;
+
+			this.asteroids.push(astr); //adiciona um asteroide a no vetor
+		}
+
 	},
 
 	update: function(){
+
+		for(var i=0, len=this.asteroids.length; i<len; i++){
+			this.asteroids[i].update();
+		}
+		
 	},
 
 	render: function(ctx){
 		ctx.clearAll(); //limpa canvas antes de escrever algo
-		this.astr.draw(ctx); //desenha um poligono comecando do ponto 100 100
+
+		for(var i=0, len=this.asteroids.length; i<len; i++){
+			this.asteroids[i].draw(ctx); //desenha um poligono
+		}
 	}
 })
