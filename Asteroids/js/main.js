@@ -13,6 +13,15 @@ var Game = Class.extend({
 		//inicia classe com um canvas de tamanho 640 x 480
 		this.canvas = new Canvas(640, 480);
 
+		//adiciona controlador das entradas
+		this.input = new InputHandler({
+			left:     37,
+			up:       38,
+			right:    39,
+			down:     40,
+			spacebar: 32
+		});
+
 		this.canvas.ctx.strokeStyle = "#fff"; //muda a cor da linha do contexto
 
 		this.currentState = null;
@@ -41,7 +50,7 @@ var Game = Class.extend({
 			} 
 
 			//atualiza as principais funcoes do jogo
-			self.currentState.handleInputs();
+			self.currentState.handleInputs(self.input);
 			self.currentState.update();
 			self.currentState.render(self.canvas.ctx);
 

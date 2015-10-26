@@ -8,20 +8,25 @@ var Asteroid = Polygon.extend({
 		this._super(p);
 		this.x = x;
 		this.y = y;
+		this.size = s;
 
 		this.scale(s);
 
 		//propriedades para fazer a movimentacao dos asteroides
 
-		this.rotAngle = 0.01*(Math.random()*2 - 1); //velocidade de rotacao varia de +- 0.01 
+		this.rotAngle = 0.02*(Math.random()*2 - 1); //velocidade de rotacao varia de +- 0.02 
 		var r = 2*Math.PI*Math.random(); //recebe um angulo de rotacao inicial que varia entre 0 e 2PI
-		var v = Math.random()*4 + 1; //randomiza a velocidade do asteroide
+		var v = Math.random() + 1; //randomiza a velocidade do asteroide
 
 		this.vel = { //vel é um vetor, nao um numero escalar
 			x: v*Math.cos(r),
 			y: v*Math.sin(r)
 		}
 	}, 
+
+	hasPoint: function(x,y){
+		return this._super(this.x, this.y, x, y);
+	},
 
 	update: function(){
 		//atualiza a posicao do asteroide
