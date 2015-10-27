@@ -11,7 +11,9 @@ var Ship = Polygon.extend({
 
 		this.flames = new Polygon(pf);//cria a chama atras da nave
 		this.flames.scale(s);
+
 		this.drawFlames = false;
+		this.visible = true;
 		
 		this.angle = 0;
 
@@ -22,6 +24,25 @@ var Ship = Polygon.extend({
 			x: 0,
 			y: 0
 		}
+	},
+
+	collide: function(astr){ //compara se asteroide atingiu a nave
+		if(!this.visible){ //quando a nave nao estiver visivel, nao haverá colisao
+			return false;
+		}
+
+
+		/*for percorre todos os pontos da nave e compara dada ponto com o asteroide
+		OBS: é subtraide 2 de len, porque os dois primeiros e ultimos pontos do vetor sao iguais*/
+		for(var i=0,len=this.points.length-2; i<len; i+=2){ 
+			var x = this.points[i]+this.x; //recebe a posicao original do ponto + o deslocamento
+			var y = this.points[i+1]+this.y;
+
+			if(astr.hasPoint(x,y)){
+				return true;
+			}
+		}
+		return false;
 	},
 
 	shoot: function(){
@@ -79,10 +100,16 @@ var Ship = Polygon.extend({
 	},
 
 	draw: function(ctx){
+
+		if(!this.visible){
+			return; //se a nave nao estiver visivel, nao a desenha na tela
+		}
+
 		ctx.drawPolygon(this, this.x, this.y);
 
 		if(this.drawFlames){
 			ctx.drawPolygon(this.flames,this.x,this.y);
+			this.drawFlames = false; //certifica que a chama da nave só vai aparecer quando o jogador estiver segurando "up"
 		}
 	}
 

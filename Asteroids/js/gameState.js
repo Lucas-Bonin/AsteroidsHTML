@@ -1,16 +1,3 @@
-var Points = { //json com vertices dos objetos
-
-	ASTEROIDS: [
-		[-4,-2,-2,-4,0,-2,2,-4,4,-2,3,0,4,2,1,4,-2,4,-4,2,-4,-2],
-		[-3,0,-4,-2,-2,-4,0,-3,2,-4,4,-2,2,-1,4,1,2,4,-1,3,-2,4,-4,2,-3,0],
-		[-2,0,-4,-1,-1,-4,2,-4,4,-1,4,1,2,4,0,4,0,1,-2,4,-4,1,-2,0],
-		[-1,-2,-2,-4,1,-4,4,-2,4,-1,1,0,4,2,2,4,1,3,-2,4,-4,1,-4,-2,-1,-2],
-		[-4,-2,-2,-4,2,-4,4,-2,4,2,2,4,-2,4,-4,2,-4,-2]
-	],
-
-	SHIP: [6,0,-3,-3,-2,0,-3,3,6,0],
-	FLAMES: [-2,0,-3,-1,-5,0,-3,1,-2,0]
-}
 
 var asteroidSize = 8; //tamanho original de um asteroide
 
@@ -27,6 +14,16 @@ var GameState = State.extend({
 		this.ship.maxX = this.canvasWidth; 
 		this.ship.maxY = this.canvasHeight; 
 
+		this.lives = 3;
+		this.score = 0; 
+
+		//vida que aparece na tela
+		this.lifePolygon = new Polygon(Points.SHIP);
+		this.lifePolygon.scale(1.5);
+		this.lifePolygon.rotate(-Math.PI/2);
+
+		this.gameOver = false; //flag que verifica final do jogo
+
 		this.lvl = 0; //determina a dificuldade do jogo
 
 		this.generateLvl(); //gera as naves do jogo
@@ -36,7 +33,7 @@ var GameState = State.extend({
 	generateLvl: function(){
 		/*determina quantos asteroides vao respawnar, dependendo do nivel do jogo. 
 		OBS: Fazer uma formula melhor para o respawn*/
-		var num = Math.round((this.lvl + 5)/10 + 2); 
+		var num = Math.round(Math.atan(this.lvl/25)) + 3; 
 
 		//reposiciona nave no inicia de cada fase
 		this.ship.x = this.canvasWidth/2;
@@ -69,13 +66,21 @@ var GameState = State.extend({
 	},
 
 	handleInputs: function(input){ //gerencia a movimentacao da nave
+		
+		if(!this.ship.visible){ //quando jogador morrer, o jogo só recomeca quando ele apertar espaco
+			if(input.isPressed("spacebar")){
+				this.ship.visible = true;
+			}
+
+			return;
+		}
+
 		if(input.isDown("right")){
 			this.ship.rotate(0.06);
 		}
 		if(input.isDown("left")){
 			this.ship.rotate(-0.06);
 		}
-		this.ship.drawFlames = false; //certifica que a chama da nave só vai aparecer quando o jogador estiver segurando "up"
 		if(input.isDown("up")){
 			this.ship.addVel();
 		}
@@ -93,6 +98,28 @@ var GameState = State.extend({
 			var a = this.asteroids[i];
 			a.update();
 
+			//compara se um asteroide atingiu a nave, pode-se otimizar a funcao
+
+			if(this.ship.collide(a)){
+
+				//centraliza nave e remove sua aceleracao
+				this.ship.x = this.canvasWidth/2;
+				this.ship.y = this.canvasHeight/2;
+
+				this.ship.vel = {
+					x: 0,
+					y: 0
+				}
+
+				this.lives--; //decrementa a vida do jogador
+				if(this.lives <= 0){
+					this.gameOver = true;
+				}
+				this.ship.visible = false; //deixa a nave invisivel
+				this.ship.drawFlames = false; 
+
+				
+			}
 
 			/* nessa parte, compara se um projetil atingiu um asteroide, mas para isso, compara-se com todos os asteroides
 			no jogo, futuramente, implementar um algoritimo para reduzir a quantidade de comparacoes necessárias.*/
@@ -103,6 +130,19 @@ var GameState = State.extend({
 					this.bullets.splice(j,1); //se atingiu destroi a bala
 					len2--;
 					j--;
+
+					//determina quantos pontos jogador vai receber por ter acertado o asteroide
+					switch(a.size){
+						case asteroidSize:
+							this.score += 20;
+						break;
+						case asteroidSize/2:
+							this.score += 50;
+						break;
+						case asteroidSize/4:
+							this.score += 100;
+						break;
+					}
 
 					if(a.size > asteroidSize/4){ //verifica se dá pra dividir o asteroide em dois
 						for(var k=0; k<2; k++){ //cria dois asteroides com a metade do tamanho do anterior
@@ -151,7 +191,17 @@ var GameState = State.extend({
 	},
 
 	render: function(ctx){
+
 		ctx.clearAll(); //limpa canvas antes de escrever algo
+
+		//mostra o score na tela
+		ctx.vectorText(this.score,3,35,15); //OBS: valores absolutos para o tamanho do texto, futuramente fazer responsivo
+
+		//desenha as vidas na tela
+		//OBS: valor fixo para o desenho, mudar para se ajustar ao tamanho da tela
+		for(var i=0; i < this.lives; i++){
+			ctx.drawPolygon(this.lifePolygon, 40+15*i, 50);
+		}
 
 		for(var i=0, len=this.asteroids.length; i<len; i++){
 			this.asteroids[i].draw(ctx); //desenha um poligono 

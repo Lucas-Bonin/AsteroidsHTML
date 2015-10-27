@@ -8,11 +8,17 @@ var Canvas = Class.extend({
 		this.canvas.width = width;
 		this.canvas.height = height;
 
+
+
 		//cria um contexto
 		//essa funcao recebe como parametro this.canvas.getContext("2d") e retorna um contexto
 		this.ctx = (function(ctx){
 			ctx.height = ctx.canvas.height;
 			ctx.width = ctx.canvas.width;
+
+			//char code para criacao do texto
+			ctx.ACODE = "A".charCodeAt(0);
+			ctx.ZCODE = "0".charCodeAt(0);
 
 			/*funcao desenha poligono
 			recebe como parametro um array de pontos que sao as vertices do poligono e as coordenadas no inicio do desenho
@@ -31,6 +37,38 @@ var Canvas = Class.extend({
 					this.lineTo(p[i] + x, p[i+1] + y);
 				}
 				this.stroke(); //desenha tudo
+			};
+
+			// funcao cria um texto desenhando cada letra no canvas
+			ctx.vectorText = function(text, s, x, y){ //string, tamanho , posisao x  e y
+				text = text.toString().toUpperCase(); //tranforma a string em letras maiusculas
+
+				var step = s*6 //determina o espacamento entre as letras
+
+				//aumenta a resolucao das letras
+				x += 0.5;
+				y += 0.5;
+
+				for(var i=0,len=text.length; i<len; i++){
+					var ch = text.charCodeAt(i); //recebe o codigo da letra 
+
+					var p;
+					if(ch - this.ACODE >= 0){ //verifica se char é uma letra
+						p = Points.LETTERS[ch-this.ACODE]; //recebe o vetor de pontos da letra
+					}else{
+						p = Points.NUMBERS[ch - this.ZCODE];
+					}
+
+					this.beginPath(); 
+				
+					this.moveTo(p[0]*s + x, p[1]*s + y); 
+					for(var j=2,len2=p.length; j<len2; j+=2){
+						this.lineTo(p[j]*s + x, p[j+1]*s + y);
+					}
+					this.stroke();
+					x += step; //quando comecar a desenhar, a proxima letra terá um espacamento da primeira
+				}
+				
 			};
 
 			ctx.clearAll = function(){ //limpa tudo que tem no canvas
