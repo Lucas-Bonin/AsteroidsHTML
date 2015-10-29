@@ -19,6 +19,7 @@ var Canvas = Class.extend({
 			//char code para criacao do texto
 			ctx.ACODE = "A".charCodeAt(0);
 			ctx.ZCODE = "0".charCodeAt(0);
+			ctx.SCODE = " ".charCodeAt(0);
 
 			/*funcao desenha poligono
 			recebe como parametro um array de pontos que sao as vertices do poligono e as coordenadas no inicio do desenho
@@ -40,10 +41,24 @@ var Canvas = Class.extend({
 			};
 
 			// funcao cria um texto desenhando cada letra no canvas
-			ctx.vectorText = function(text, s, x, y){ //string, tamanho , posisao x  e y
+			ctx.vectorText = function(text, s, x, y, offset){ //string, tamanho , posisao x, y e offset
 				text = text.toString().toUpperCase(); //tranforma a string em letras maiusculas
 
 				var step = s*6 //determina o espacamento entre as letras
+
+				if(typeof offset === "number"){ //comeca string depois do offset
+					x += step*(offset - text.length); 
+				}
+
+				//se 'x' receber null, centraliza texto na horizontal
+				if(typeof x !== "number"){
+					x = Math.round((this.width - text.length*step)/2);
+				}
+
+				//se 'y' receber null, centraliza texto na vertical
+				if(typeof y !== "number"){
+					y = Math.round((this.height - step)/2);
+				}
 
 				//aumenta a resolucao das letras
 				x += 0.5;
@@ -51,6 +66,11 @@ var Canvas = Class.extend({
 
 				for(var i=0,len=text.length; i<len; i++){
 					var ch = text.charCodeAt(i); //recebe o codigo da letra 
+
+					if(ch === this.SCODE){ //compara se o que foi digitado é um espaco
+						x += step;
+						continue;
+					}
 
 					var p;
 					if(ch - this.ACODE >= 0){ //verifica se char é uma letra

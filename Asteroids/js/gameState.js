@@ -14,7 +14,7 @@ var GameState = State.extend({
 		this.ship.maxX = this.canvasWidth; 
 		this.ship.maxY = this.canvasHeight; 
 
-		this.lives = 3;
+		this.lives = 1;
 		this.score = 0; 
 
 		//vida que aparece na tela
@@ -43,18 +43,21 @@ var GameState = State.extend({
 
 		this.asteroids = []; //asteroides no jogo
 
-		//respawnar randomicamente asteroides sempre nas extremidades da tela
-		var x = 0;
-		var y = 0;
-		if(Math.random() > 0.5){
-			x = Math.random()*this.canvasWidth;
-		}else{
-			y = Math.random()*this.canvasHeight;
-		}
+
 
 		for(var i=0; i<num; i++){
 
 			var n = Math.round(Math.random() * (Points.ASTEROIDS.length-1));
+
+			//respawnar randomicamente asteroides sempre nas extremidades da tela
+			var x = 0;
+			var y = 0;
+			if(Math.random() > 0.5){
+				x = Math.random()*this.canvasWidth;
+			}else{
+				y = Math.random()*this.canvasHeight;
+			}
+
 			var astr = new Asteroid(Points.ASTEROIDS[n],asteroidSize,x,y);
 			//parametros para asteroide saber o tamanho maximo do canvas
 			astr.maxX = this.canvasWidth;
@@ -69,6 +72,13 @@ var GameState = State.extend({
 		
 		if(!this.ship.visible){ //quando jogador morrer, o jogo só recomeca quando ele apertar espaco
 			if(input.isPressed("spacebar")){
+
+				if(this.gameOver){
+
+					this.game.nextState = States.END;
+					this.game.stateVars.score = this.score; //passa score para uma variavel da main
+					return;
+				}
 				this.ship.visible = true;
 			}
 
@@ -209,6 +219,10 @@ var GameState = State.extend({
 
 		for(var i=0, len=this.bullets.length; i<len; i++){
 			this.bullets[i].draw(ctx);
+		}
+
+		if(this.gameOver){ //se acabar jogo, printar mensagem na tela
+			ctx.vectorText("Game Over",4, null,null); //parametro null centraliza a imagem na tela
 		}
 
 		this.ship.draw(ctx);  
