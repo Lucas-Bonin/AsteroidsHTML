@@ -86,7 +86,7 @@ var Ship = Polygon.extend({
 		this.vel.x *= 0.99
 		this.vel.y *= 0.99
 
-		//essa verificacao permite ao asteroide, quando estiver saindo de um lado da tela, aparecer do outro lado, tipo o jogo Snake
+		//essa verificacao permite a nave, quando estiver saindo de um lado da tela, aparecer do outro lado, tipo o jogo Snake
 		if(this.x> this.maxX){
 			this.x = 0;
 		}else if(this.x<0){

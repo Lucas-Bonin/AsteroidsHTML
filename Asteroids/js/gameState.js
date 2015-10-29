@@ -14,7 +14,7 @@ var GameState = State.extend({
 		this.ship.maxX = this.canvasWidth; 
 		this.ship.maxY = this.canvasHeight; 
 
-		this.lives = 1;
+		this.lives = 5;
 		this.score = 0; 
 
 		//vida que aparece na tela

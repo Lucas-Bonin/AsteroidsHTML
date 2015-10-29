@@ -1,7 +1,7 @@
 var EndState = State.extend({
 
 	init: function(game) {
-		this.game = game;
+		this._super(game);
 
 		this.hasEnterName = false; //verifica se jogador ja escreveu um nome
 		this.nick = "no name"; //nome do jogador

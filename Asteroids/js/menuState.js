@@ -1,7 +1,7 @@
 var MenuState = State.extend({
 
 	init: function(game){ //quando iniciar menu, respawnar alguns asteroides no background
-		this.game = game;
+		this.super(game);
 
 		this.canvasWidth = game.canvas.ctx.width;
 		this.canvasHeight = game.canvas.ctx.height;
