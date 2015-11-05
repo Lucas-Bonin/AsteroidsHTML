@@ -26,7 +26,9 @@ var Canvas = Class.extend({
 			ferramenta para desenha poligono:
 			https://dl.dropboxusercontent.com/spa/fiu9vh5o72q88a4/polygon-draw/index.html
 			*/
-			ctx.drawPolygon = function(p, x, y){
+
+
+			ctx.drawPolygon = function(p, x, y, color){
 				p = p.points;
 
 				this.beginPath(); //comeca o desenho
@@ -37,7 +39,17 @@ var Canvas = Class.extend({
 				for(var i=2,len=p.length; i<len; i+=2){
 					this.lineTo(p[i] + x, p[i+1] + y);
 				}
-				this.stroke(); //desenha tudo
+
+				if(color){
+					var aux = this.strokeStyle;
+					this.strokeStyle = color;
+					this.stroke(); //desenha tudo
+
+					this.strokeStyle = aux;
+				}else{
+					this.stroke(); //desenha tudo
+
+				}
 			};
 
 			// funcao cria um texto desenhando cada letra no canvas

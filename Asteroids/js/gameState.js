@@ -14,7 +14,7 @@ var GameState = State.extend({
 		this.ship.maxX = this.canvasWidth; 
 		this.ship.maxY = this.canvasHeight; 
 
-		this.lives = 1;
+		this.lives = 4;
 		this.score = 0; 
 
 		//vida que aparece na tela
@@ -39,9 +39,13 @@ var GameState = State.extend({
 		this.ship.x = this.canvasWidth/2;
 		this.ship.y = this.canvasHeight/2;
 
+		this.ship.isTripleShoot = false; //nave comeca outra fase sem o powerUp
+
 		this.bullets = []; //vetor de balas disparadas
 
 		this.asteroids = []; //asteroides no jogo
+
+		this.powerUps = []; //powerUps no jogo
 
 
 
@@ -95,7 +99,11 @@ var GameState = State.extend({
 			this.ship.addVel();
 		}
 		if(input.isPressed("spacebar")){
-			this.bullets.push(this.ship.shoot()); //quando apertar espaco, instancia uma bala no jogo
+
+			var newBullets = this.ship.shoot();
+			for (var i=0,len = newBullets.length; i<len;i++){
+				this.bullets.push(newBullets[i]); //quando apertar espaco, instancia uma bala no jogo
+			}
 		}
 
 	},
@@ -116,6 +124,8 @@ var GameState = State.extend({
 				this.ship.x = this.canvasWidth/2;
 				this.ship.y = this.canvasHeight/2;
 
+				this.ship.isTripleShoot = false; //tira powerUp da nave
+
 				this.ship.vel = {
 					x: 0,
 					y: 0
@@ -126,9 +136,7 @@ var GameState = State.extend({
 					this.gameOver = true;
 				}
 				this.ship.visible = false; //deixa a nave invisivel
-				this.ship.drawFlames = false; 
-
-				
+				this.ship.drawFlames = false; 	
 			}
 
 			/* nessa parte, compara se um projetil atingiu um asteroide, mas para isso, compara-se com todos os asteroides
@@ -156,15 +164,31 @@ var GameState = State.extend({
 
 					if(a.size > asteroidSize/4){ //verifica se dá pra dividir o asteroide em dois
 						for(var k=0; k<2; k++){ //cria dois asteroides com a metade do tamanho do anterior
+
+							var astr = null;
+
 							var n = Math.round(Math.random() * (Points.ASTEROIDS.length-1));
-							var astr = new Asteroid(Points.ASTEROIDS[n],a.size/2,a.x,a.y);
 
-							//parametros para asteroide saber o tamanho maximo do canvas
-							astr.maxX = this.canvasWidth;
-							astr.maxY = this.canvasHeight; 
+							if(Math.random()<0){ //determina se o que será respawnado será um asteroide ou um powerUp
+								astr = new Asteroid(Points.ASTEROIDS[n],a.size/2,a.x,a.y);
+								//parametros para asteroide saber o tamanho maximo do canvas
+								astr.maxX = this.canvasWidth;
+								astr.maxY = this.canvasHeight; 
 
-							this.asteroids.push(astr); //adiciona um asteroide a no vetor
-							len++;
+								this.asteroids.push(astr); //adiciona um asteroide a no vetor
+								len++;
+
+
+							}else{
+								astr = new PowerUp(a.x,a.y);
+
+								astr.maxX = this.canvasWidth;
+								astr.maxY = this.canvasHeight; 
+
+								this.powerUps.push(astr);
+							}
+
+							
 						}
 					}
 					this.asteroids.splice(i,1); //tira o asteroide destruido do vetor
@@ -188,6 +212,44 @@ var GameState = State.extend({
 				len--;
 				i--;
 			}
+		}
+
+		//updadte do powerUp
+		for(var i=0, len=this.powerUps.length; i<len; i++){
+			
+			var a = this.powerUps[i];
+			a.update();
+
+			//compara se a nave acertou um powerUp
+			if(this.ship.collide(a)){
+
+				//verifica o tipo do powerUp
+				this.setPowerUp(a.powerType);
+				this.powerUps.splice(i,1); //tira o asteroide destruido do vetor
+				len--;
+				i--;
+
+
+			}
+
+			//verifica se alguma bala acertou o powerUp
+
+			for(var j=0, len2=this.bullets.length; j<len2; j++){ //for percorre o vetor das balas
+				var b = this.bullets[j];
+				if(a.hasPoint(b.x,b.y)){ //funcao que verifica se um ponto atingiu o asteroide
+					this.bullets.splice(j,1); //se atingiu destroi a bala
+					len2--;
+					j--;
+
+					this.setPowerUp(a.powerType);
+
+					this.powerUps.splice(i,1); //tira o asteroide destruido do vetor
+					len--;
+					i--;
+				}
+
+			}
+
 		}
 
 
@@ -217,6 +279,11 @@ var GameState = State.extend({
 			this.asteroids[i].draw(ctx); //desenha um poligono 
 		}
 
+		for(var i=0, len=this.powerUps.length; i<len; i++){
+			this.powerUps[i].draw(ctx);
+		}
+
+
 		for(var i=0, len=this.bullets.length; i<len; i++){
 			this.bullets[i].draw(ctx);
 		}
@@ -226,5 +293,60 @@ var GameState = State.extend({
 		}
 
 		this.ship.draw(ctx);  
+	},
+
+	//aciona o powerUp
+	setPowerUp: function(currentPowerUp){
+		switch (currentPowerUp){
+
+			case POWER.LIFE:
+					this.lives++;
+				break;
+			case POWER.THREE_BULLETS:
+					this.ship.isTripleShoot = true;
+				break;
+			case POWER.DESTRUCTION:
+					//destroi todos os asteroides em cena, case eles ainda possam se partir, cria mais asteroides
+					var asteroidsAux = [];
+					for(var i=0, len=this.asteroids.length; i<len; i++){
+
+						var a = this.asteroids[i];
+
+						//determina quantos pontos jogador vai receber por ter acertado o asteroide
+						switch(a.size){
+							case asteroidSize:
+								this.score += 20;
+							break;
+							case asteroidSize/2:
+								this.score += 50;
+							break;
+							case asteroidSize/4:
+								this.score += 100;
+							break;
+						}
+
+						if(a.size > asteroidSize/4){ //verifica se dá pra dividir o asteroide em dois
+							for(var k=0; k<2; k++){ //cria dois asteroides com a metade do tamanho do anterior
+								var n = Math.round(Math.random() * (Points.ASTEROIDS.length-1));
+								var astr = new Asteroid(Points.ASTEROIDS[n],a.size/2,a.x,a.y);
+								//parametros para asteroide saber o tamanho maximo do canvas
+								astr.maxX = this.canvasWidth;
+								astr.maxY = this.canvasHeight; 
+
+								asteroidsAux.push(astr); //adiciona um asteroide a no vetor
+								
+							}
+						}
+					}
+
+					this.asteroids = asteroidsAux;
+
+				break;
+			case POWER.DOUBLE_SCORE:
+						this.score += this.score;
+				break;
+		}
+
+
 	}
 })

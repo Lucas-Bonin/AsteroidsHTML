@@ -19,6 +19,7 @@ var Ship = Polygon.extend({
 
 		this.scale(s);
 
+		this.isTripleShoot = false;
 
 		this.vel = { //vel é um vetor, nao um numero escalar
 			x: 0,
@@ -46,10 +47,30 @@ var Ship = Polygon.extend({
 	},
 
 	shoot: function(){
+		var bullets = []
+
 		var b = new Bullet(this.points[0]+this.x, this.points[1]+this.y, this.angle); //instancia a bala a partir da ponta da nave
 		b.maxX = this.maxX;
 		b.maxY = this.maxY; 
-		return b;
+
+		bullets.push(b);
+
+		if(this.isTripleShoot){
+
+			b = new Bullet(this.points[0]+this.x, this.points[1]+this.y, this.angle+0.5);
+			b.maxX = this.maxX;
+			b.maxY = this.maxY; 
+
+			bullets.push(b);
+
+			b = new Bullet(this.points[0]+this.x, this.points[1]+this.y, this.angle-0.5);
+			b.maxX = this.maxX;
+			b.maxY = this.maxY; 
+
+			bullets.push(b);
+		}
+
+		return bullets;
 	},
 
 	/*a nave nao terá um valor fixo para sua velocidade. Enquanto o jogador estiver apertando o botao de acelerar,
