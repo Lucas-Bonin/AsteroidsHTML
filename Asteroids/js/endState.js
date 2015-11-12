@@ -3,18 +3,24 @@ var EndState = State.extend({
 	init: function(game) {
 		this._super(game);
 
+		Parse.initialize("PlHq0MUk90ZbnJSxqQCVktVlmLE6WJsJPybLUYeQ", "aaEOgPm7UXjwJLoqdYE0l8taqUseJCqUsv5pompE");
+
+
+		
+
 		this.hasEnterName = false; //verifica se jogador ja escreveu um nome
 		this.nick = "no name"; //nome do jogador
 		this.score = game.stateVars.score; //recebe o score do jogador
 
 		//socore fake para representacao na tela;
 		//OBS: implementar um score de verdade guardando valores em algum lugar
-		this.hisores = [
-			["manuel", 1010],
-			["binario", 11111],
-			["itapira", 1011],
-			["samu3l", 10000]
-		];
+		// this.hiscore = [
+		// 	["manuel", 1010],
+		// 	["binario", 11111],
+		// 	["itapira", 1011],
+		// 	["samu3l", 10000]
+		// ];
+		this.hiscore = [];
 
 		//recebe nome do jogador em um campo de texto em html
 		//OBS: esconder o campo de texto que aparece na tela
@@ -22,6 +28,9 @@ var EndState = State.extend({
 		this.namefield.value = this.nick;
 		this.namefield.focus(); //quando carregar a tela vai direto para campo de texto
 		this.namefield.select();
+
+		this.ranking = new RankingParse();
+		
 	},
 
 	handleInputs: function(input) {
@@ -39,12 +48,25 @@ var EndState = State.extend({
 
 				//cria uma string contendo apenas letras e numeros e insere no vetor de score
 				this.nick = this.nick.replace(/[^a-zA-Z0-9\s]/g, "");
-				this.hisores.push([this.nick, this.score]); 
+				var newScore = {playerName: this.nick, score: this.score};
+				//this.hiscore.push(newScore); 
+
+
+
+				//guardar dado
+				this.ranking.save(newScore.playerName,newScore.score);
+
+				var self = this;
+				this.ranking.getScore(function(result){
+					self.hiscore = result;
+				});
 
 				// ordena o vetor de score
-				this.hisores.sort(function(a, b) {
+				this.hiscore.sort(function(a, b) {
 					return b[1] - a[1];
 				});
+
+
 			}
 		}
 	},
@@ -53,6 +75,7 @@ var EndState = State.extend({
 	 * @override State.update
 	 */
 	update: function() {
+
 		if (!this.hasEnterName) {
 			this.namefield.focus();
 
@@ -65,6 +88,8 @@ var EndState = State.extend({
 			this.namefield.value = this.namefield.value.replace(/[^a-zA-Z0-9\s]/g, "");
 			this.nick = this.namefield.value;
 		}
+
+
 	},
 
 
@@ -75,10 +100,11 @@ var EndState = State.extend({
 			
 
 			ctx.vectorText("Hiscore", 3, null, 130);
-			for (var i = 0, len = this.hisores.length; i < len; i++) {
-				var hs = this.hisores[i];
-				ctx.vectorText(hs[0], 2, 200, 200+25*i);
-				ctx.vectorText(hs[1], 2, 320, 200+25*i, 10); //ultimo parametro indica espacamento antes de escrever a string
+			for (var i = 0; i < this.hiscore.length; i++) {
+				var hs = this.hiscore[i];
+				console.log(hs);
+				ctx.vectorText(hs.playerName, 2, 200, 200+25*i);
+				ctx.vectorText(hs.score, 2, 320, 200+25*i, 10); //ultimo parametro indica espacamento antes de escrever a string
 			}
 			ctx.vectorText("press space to continue", 1, 200, 350);
 
@@ -89,5 +115,6 @@ var EndState = State.extend({
 			ctx.vectorText(this.nick, 3, null, 220);
 			ctx.vectorText(this.score, 3, null, 300);
 		}
-	}
+	},
+
 });

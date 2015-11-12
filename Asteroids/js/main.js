@@ -30,7 +30,7 @@ var Game = Class.extend({
 		}
 
 		this.currentState = null;
-		this.nextState = States.MENU;
+		this.nextState = States.END;
 
 	},
 

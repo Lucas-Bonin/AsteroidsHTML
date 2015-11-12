@@ -1,5 +1,6 @@
 
 var asteroidSize = 8; //tamanho original de um asteroide
+var probPowerUp = 0.05; //probabilidade de respawnar um powerUp
 
 var GameState = State.extend({
 	init: function(game){
@@ -33,8 +34,8 @@ var GameState = State.extend({
 	generateLvl: function(){
 		/*determina quantos asteroides vao respawnar, dependendo do nivel do jogo. 
 		OBS: Fazer uma formula melhor para o respawn*/
-		var num = Math.round(Math.atan(this.lvl/25)) + 3; 
-
+		//var num = Math.round(Math.atan(this.lvl/25)) + 3; 
+		var num = this.lvl*2 + 3;
 		//reposiciona nave no inicia de cada fase
 		this.ship.x = this.canvasWidth/2;
 		this.ship.y = this.canvasHeight/2;
@@ -169,7 +170,7 @@ var GameState = State.extend({
 
 							var n = Math.round(Math.random() * (Points.ASTEROIDS.length-1));
 
-							if(Math.random()<0){ //determina se o que será respawnado será um asteroide ou um powerUp
+							if(Math.random()>probPowerUp){ //determina se o que será respawnado será um asteroide ou um powerUp
 								astr = new Asteroid(Points.ASTEROIDS[n],a.size/2,a.x,a.y);
 								//parametros para asteroide saber o tamanho maximo do canvas
 								astr.maxX = this.canvasWidth;
