@@ -1,6 +1,6 @@
 
 var asteroidSize = 8; //tamanho original de um asteroide
-var probPowerUp = 0.05; //probabilidade de respawnar um powerUp
+var probPowerUp = 0.1; //probabilidade de respawnar um powerUp
 
 var GameState = State.extend({
 	init: function(game){

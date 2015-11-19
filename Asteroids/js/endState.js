@@ -2,24 +2,12 @@ var EndState = State.extend({
 
 	init: function(game) {
 		this._super(game);
-
-		Parse.initialize("PlHq0MUk90ZbnJSxqQCVktVlmLE6WJsJPybLUYeQ", "aaEOgPm7UXjwJLoqdYE0l8taqUseJCqUsv5pompE");
-
-
-		
+	
 
 		this.hasEnterName = false; //verifica se jogador ja escreveu um nome
 		this.nick = "no name"; //nome do jogador
 		this.score = game.stateVars.score; //recebe o score do jogador
 
-		//socore fake para representacao na tela;
-		//OBS: implementar um score de verdade guardando valores em algum lugar
-		// this.hiscore = [
-		// 	["manuel", 1010],
-		// 	["binario", 11111],
-		// 	["itapira", 1011],
-		// 	["samu3l", 10000]
-		// ];
 		this.hiscore = [];
 
 		//recebe nome do jogador em um campo de texto em html
