@@ -13,9 +13,10 @@ var Canvas = Class.extend({
 		//cria um contexto
 		//essa funcao recebe como parametro this.canvas.getContext("2d") e retorna um contexto
 		this.ctx = (function(ctx){
-			ctx.height = ctx.canvas.height;
-			ctx.width = ctx.canvas.width;
-
+			// ctx.height = $(window).width() * 0.6;
+			// ctx.width = $(window).width() * 0.25;
+			ctx.height = height;
+			ctx.width = width;
 			//char code para criacao do texto
 			ctx.ACODE = "A".charCodeAt(0);
 			ctx.ZCODE = "0".charCodeAt(0);
